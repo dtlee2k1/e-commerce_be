@@ -1,18 +1,11 @@
 import express from 'express'
-import { Request, Response, NextFunction } from 'express'
+import { addProductController, renderAddProductPageController } from '~/controllers/products.controllers'
 
 const adminRouter = express.Router()
 
 // /admin/add-product => GET
-adminRouter.get('/add-product', (req: Request, res: Response, next: NextFunction) => {
-  res.render('add-product', { pageTitle: 'Add Product', path: '/admin/add-product' })
-})
-
-export const products: any = []
+adminRouter.get('/add-product', renderAddProductPageController)
 
 // /admin/add-product => POST
-adminRouter.post('/add-product', (req: Request, res: Response, next: NextFunction) => {
-  products.push({ title: req.body.title })
-  res.redirect('/')
-})
+adminRouter.post('/add-product', addProductController)
 export default adminRouter
