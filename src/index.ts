@@ -3,9 +3,12 @@ import express from 'express'
 import adminRouter from './routes/admin.routes'
 import shopRouter from './routes/shop.routes'
 import { render404PageController } from './controllers/errors.controllers'
+import { initFolder } from './utils/file'
 
 const port = 3000
 const app = express()
+
+initFolder()
 
 app.set('view engine', 'ejs')
 app.set('views', './src/views')
