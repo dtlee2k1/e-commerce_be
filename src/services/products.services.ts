@@ -3,10 +3,10 @@ import { Product, ProductType } from '~/models/schemas/Product.schema'
 import { readFileAsync, writeFileAsync } from '~/utils/file'
 
 class ProductService {
-  async save({ title }: ProductType) {
+  async save(payload: ProductType) {
     try {
       const products: ProductType[] = await readFileAsync(PRODUCTS_DATA_DIR)
-      products.push(new Product({ title }))
+      products.push(new Product(payload))
       await writeFileAsync(PRODUCTS_DATA_DIR, products)
     } catch (error) {
       console.error('Error saving product:', error)
