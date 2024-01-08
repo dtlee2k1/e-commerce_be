@@ -16,6 +16,12 @@ class ProductService {
   async fetchAll() {
     return readFileAsync(PRODUCTS_DATA_DIR)
   }
+
+  async findById(id: string) {
+    const products: ProductType[] = await readFileAsync(PRODUCTS_DATA_DIR)
+    const foundProduct = products.find((product) => product.id === id)
+    return foundProduct
+  }
 }
 
 const productService = new ProductService()

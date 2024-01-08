@@ -3,11 +3,11 @@ import { ParamsDictionary } from 'express-serve-static-core'
 import { ProductReqBody } from '~/models/requests/Product.requests'
 import productService from '~/services/products.services'
 
-export const renderAdminPageController = (req: Request, res: Response, next: NextFunction) => {
+export const renderAdminViewController = (req: Request, res: Response, next: NextFunction) => {
   res.render('admin/add-product', { pageTitle: 'Add Product', path: '/admin/add-product' })
 }
 
-export const renderAdminProductsPageController = async (req: Request, res: Response, next: NextFunction) => {
+export const renderAdminProductsViewController = async (req: Request, res: Response, next: NextFunction) => {
   const products = await productService.fetchAll()
   res.render('admin/products', { pageTitle: 'Admin Products', path: '/admin/products', products })
 }

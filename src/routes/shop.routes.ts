@@ -1,19 +1,26 @@
 import express from 'express'
 import {
-  renderCartPageController,
-  renderCheckoutPageController,
-  renderIndexPageController,
-  renderProductsPageController
+  addToCartController,
+  renderCartViewController,
+  renderCheckoutViewController,
+  renderIndexViewController,
+  renderProductDetailController,
+  renderProductsViewController
 } from '~/controllers/shop.controllers'
+import { wrapRequestHandler } from '~/utils/handlers'
 
 const shopRouter = express.Router()
 
-shopRouter.get('/', renderIndexPageController)
+shopRouter.get('/', renderIndexViewController)
 
-shopRouter.get('/products', renderProductsPageController)
+shopRouter.get('/products', renderProductsViewController)
 
-shopRouter.get('/cart', renderCartPageController)
+shopRouter.get('/products/:productId', renderProductDetailController)
 
-shopRouter.get('/checkout', renderCheckoutPageController)
+shopRouter.get('/cart', renderCartViewController)
+
+shopRouter.post('/cart', addToCartController)
+
+shopRouter.get('/checkout', renderCheckoutViewController)
 
 export default shopRouter
