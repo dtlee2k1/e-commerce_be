@@ -13,15 +13,15 @@ export const initFolder = () => {
   })
 }
 
-export const readFileAsync = async (filePath: string) => {
+export const readFileAsync = async (filePath: string, errorFallback: any = []) => {
   try {
     const data = await fsPromise.readFile(filePath)
     return JSON.parse(data.toString())
   } catch (error) {
-    return []
+    return errorFallback
   }
 }
 
-export const writeFileAsync = async (filePath: string, data: any[]) => {
+export const writeFileAsync = async (filePath: string, data: any) => {
   await fsPromise.writeFile(filePath, JSON.stringify(data))
 }

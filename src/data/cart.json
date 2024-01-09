@@ -1,0 +1,7 @@
+{
+  "products": [
+    { "id": "12344", "quantity": 1 },
+    { "id": "12345", "quantity": 2 }
+  ],
+  "totalPrice": 50.230000000000004
+}

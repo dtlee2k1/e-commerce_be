@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { ProductReqParams } from '~/models/requests/Product.requests'
+import cartService from '~/services/cart.services'
 import productService from '~/services/products.services'
 
 export const renderIndexViewController = async (req: Request, res: Response, next: NextFunction) => {
@@ -33,5 +34,10 @@ export const renderCheckoutViewController = async (req: Request, res: Response, 
 
 export const addToCartController = async (req: Request, res: Response, next: NextFunction) => {
   const { productId } = req.body
+
+  const product = await productService.findById(productId)
+
+  await cartService.addProduct(productId, product.price)
+
   res.redirect('/cart')
 }

@@ -18,6 +18,6 @@ export const addProductController = async (
   next: NextFunction
 ) => {
   const { title, imageUrl, price, description } = req.body
-  await productService.save({ title, imageUrl, price, description })
+  await productService.save({ title, imageUrl, price: Number(price), description })
   res.redirect('/')
 }

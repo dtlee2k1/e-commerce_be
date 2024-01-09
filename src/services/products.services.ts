@@ -20,6 +20,9 @@ class ProductService {
   async findById(id: string) {
     const products: ProductType[] = await readFileAsync(PRODUCTS_DATA_DIR)
     const foundProduct = products.find((product) => product.id === id)
+    if (!foundProduct) {
+      throw new Error('Product not found')
+    }
     return foundProduct
   }
 }
