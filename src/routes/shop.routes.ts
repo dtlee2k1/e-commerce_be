@@ -7,7 +7,6 @@ import {
   renderProductDetailController,
   renderProductsViewController
 } from '~/controllers/shop.controllers'
-import { wrapRequestHandler } from '~/utils/handlers'
 
 const shopRouter = express.Router()
 

@@ -13,8 +13,8 @@ export class Product {
   price: number
   description: string
 
-  constructor({ title, imageUrl, price, description }: ProductType) {
-    this.id = Date.now().toString()
+  constructor({ id, title, imageUrl, price, description }: ProductType) {
+    this.id = id || Date.now().toString()
     this.title = title
     this.imageUrl = imageUrl
     this.price = price

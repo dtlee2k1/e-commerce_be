@@ -1,5 +1,3 @@
-import { Product } from './Product.schema'
-
 export interface ProductInCart {
   id: string
   quantity: number

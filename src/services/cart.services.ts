@@ -15,11 +15,42 @@ class CartService {
         cart.products.push(newProduct)
       }
 
-      cart.totalPrice += productPrice
+      cart.totalPrice = +(cart.totalPrice + productPrice).toFixed(2)
 
       await writeFileAsync(CART_DATA_DIR, cart)
     } catch (error) {
       console.error('Error adding product to cart:', error)
+    }
+  }
+
+  async updateProduct(id: string, productPriceDelta: number) {
+    try {
+      const cart: Cart = await readFileAsync(CART_DATA_DIR, new Cart({ products: [], totalPrice: 0 }))
+      const product = cart.products.find((product) => product.id === id)
+
+      if (product) {
+        const productQty = product.quantity
+        cart.totalPrice = +(cart.totalPrice + productPriceDelta * productQty).toFixed(2)
+      }
+
+      await writeFileAsync(CART_DATA_DIR, cart)
+    } catch (error) {
+      console.error('Error update product in cart:', error)
+    }
+  }
+
+  async deleteProduct(id: string, productPrice: number) {
+    try {
+      const cart: Cart = await readFileAsync(CART_DATA_DIR, new Cart({ products: [], totalPrice: 0 }))
+      const product = cart.products.find((product) => product.id === id)
+      const productQty = product?.quantity || 0
+
+      cart.products = cart.products.filter((product) => product.id !== id)
+      cart.totalPrice -= productPrice * productQty
+
+      await writeFileAsync(CART_DATA_DIR, cart)
+    } catch (error) {
+      console.error('Error deleting product in cart:', error)
     }
   }
 }
