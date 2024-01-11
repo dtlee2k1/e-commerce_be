@@ -3,6 +3,10 @@ import { readFileAsync, writeFileAsync } from '~/utils/file'
 import { Cart, ProductInCart } from '~/models/schemas/Cart.schema'
 
 class CartService {
+  async getCart() {
+    return (await readFileAsync(CART_DATA_DIR, new Cart({ products: [], totalPrice: 0 }))) as Cart
+  }
+
   async addProduct(id: string, productPrice: number) {
     try {
       const cart: Cart = await readFileAsync(CART_DATA_DIR, new Cart({ products: [], totalPrice: 0 }))
@@ -43,12 +47,15 @@ class CartService {
     try {
       const cart: Cart = await readFileAsync(CART_DATA_DIR, new Cart({ products: [], totalPrice: 0 }))
       const product = cart.products.find((product) => product.id === id)
-      const productQty = product?.quantity || 0
 
-      cart.products = cart.products.filter((product) => product.id !== id)
-      cart.totalPrice -= productPrice * productQty
+      if (product) {
+        const productQty = product.quantity
 
-      await writeFileAsync(CART_DATA_DIR, cart)
+        cart.products = cart.products.filter((product) => product.id !== id)
+        cart.totalPrice -= productPrice * productQty
+
+        await writeFileAsync(CART_DATA_DIR, cart)
+      }
     } catch (error) {
       console.error('Error deleting product in cart:', error)
     }

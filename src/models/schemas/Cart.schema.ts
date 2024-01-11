@@ -1,5 +1,8 @@
+import { ProductType } from './Product.schema'
+
 export interface ProductInCart {
-  id: string
+  id?: string
+  productData?: ProductType
   quantity: number
 }
 

@@ -29,7 +29,7 @@ class ProductService {
   }
 
   async fetchAll() {
-    return readFileAsync(PRODUCTS_DATA_DIR)
+    return (await readFileAsync(PRODUCTS_DATA_DIR)) as ProductType[]
   }
 
   async findById(id: string) {
@@ -48,9 +48,11 @@ class ProductService {
       const updatedProducts = products.filter((product) => product.id !== id)
 
       if (product) {
-        await cartService.deleteProduct(id, product.price)
+        await Promise.all([
+          cartService.deleteProduct(id, product.price),
+          writeFileAsync(PRODUCTS_DATA_DIR, updatedProducts)
+        ])
       }
-      await writeFileAsync(PRODUCTS_DATA_DIR, updatedProducts)
     } catch (error) {
       console.error('Error delete product:', error)
     }

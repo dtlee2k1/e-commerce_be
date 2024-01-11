@@ -1,6 +1,7 @@
 import express from 'express'
 import {
   addToCartController,
+  deleteCartProductController,
   renderCartViewController,
   renderCheckoutViewController,
   renderIndexViewController,
@@ -19,6 +20,8 @@ shopRouter.get('/products/:productId', renderProductDetailController)
 shopRouter.get('/cart', renderCartViewController)
 
 shopRouter.post('/cart', addToCartController)
+
+shopRouter.post('/cart-delete-item', deleteCartProductController)
 
 shopRouter.get('/checkout', renderCheckoutViewController)
 

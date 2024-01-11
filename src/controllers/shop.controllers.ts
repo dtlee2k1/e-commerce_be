@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { ProductReqParams } from '~/models/requests/Product.requests'
+import { ProductInCart } from '~/models/schemas/Cart.schema'
 import cartService from '~/services/cart.services'
 import productService from '~/services/products.services'
 
@@ -23,8 +24,19 @@ export const renderProductDetailController = async (
   res.render('shop/product-detail', { pageTitle: 'Product detail', path: '/products', product })
 }
 
-export const renderCartViewController = (req: Request, res: Response, next: NextFunction) => {
-  res.render('shop/cart', { pageTitle: 'Cart', path: '/cart' })
+export const renderCartViewController = async (req: Request, res: Response, next: NextFunction) => {
+  const cart = await cartService.getCart()
+  const products = await productService.fetchAll()
+  const cartProducts: ProductInCart[] = []
+
+  products.forEach((product) => {
+    const cartProductData = cart.products.find((prod) => prod.id === product.id)
+    if (cartProductData) {
+      cartProducts.push({ productData: product, quantity: cartProductData.quantity })
+    }
+  })
+
+  res.render('shop/cart', { pageTitle: 'Cart', path: '/cart', products: cartProducts })
 }
 
 export const renderCheckoutViewController = async (req: Request, res: Response, next: NextFunction) => {
@@ -39,5 +51,12 @@ export const addToCartController = async (req: Request, res: Response, next: Nex
 
   await cartService.addProduct(productId, product.price)
 
+  res.redirect('/cart')
+}
+
+export const deleteCartProductController = async (req: Request, res: Response, next: NextFunction) => {
+  const { productId } = req.body
+  const product = await productService.findById(productId)
+  await cartService.deleteProduct(productId, product.price)
   res.redirect('/cart')
 }
