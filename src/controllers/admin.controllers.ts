@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
+import { ObjectId } from 'mongodb'
 import { ProductReqBody } from '~/models/requests/Product.requests'
+import User from '~/models/schemas/User.schema'
 import productService from '~/services/products.services'
 
 export const renderAdminProductsViewController = async (req: Request, res: Response, next: NextFunction) => {
@@ -31,7 +33,8 @@ export const addProductController = async (
   next: NextFunction
 ) => {
   const { title, imageUrl, price, description } = req.body
-  await productService.save({ title, imageUrl, price: Number(price), description })
+  const { _id: userId } = req.user as User
+  await productService.save({ title, imageUrl, price: +price, description, userId: userId as ObjectId })
   res.redirect('/')
 }
 
@@ -41,13 +44,22 @@ export const editProductController = async (
   next: NextFunction
 ) => {
   const { productId, title, imageUrl, price, description } = req.body
-  await productService.save({ id: productId, title, imageUrl, price: Number(price), description })
+  const { _id: userId } = req.user as User
+
+  await productService.save({
+    _id: new ObjectId(productId),
+    title,
+    imageUrl,
+    price: +price,
+    description,
+    userId: userId as ObjectId
+  })
+
   res.redirect('/admin/products')
 }
 
 export const deleteProductController = async (req: Request, res: Response, next: NextFunction) => {
   const { productId } = req.params
-  console.log(productId)
   await productService.deleteById(productId)
   res.redirect('/admin/products')
 }

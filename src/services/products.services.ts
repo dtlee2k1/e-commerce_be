@@ -1,58 +1,40 @@
-import { PRODUCTS_DATA_DIR } from '~/constants/dir'
-import { Product, ProductType } from '~/models/schemas/Product.schema'
-import { readFileAsync, writeFileAsync } from '~/utils/file'
-import cartService from './cart.services'
+import databaseService from './database.services'
+import Product, { ProductType } from '~/models/schemas/Product.schema'
+import { ObjectId } from 'mongodb'
 
 class ProductService {
   async save(payload: ProductType) {
-    try {
-      const products: ProductType[] = await readFileAsync(PRODUCTS_DATA_DIR)
+    const { _id, ...productData } = payload
 
-      if (payload.id) {
-        const productIndex = products.findIndex((product) => product.id === payload.id)
-
-        if (productIndex !== -1) {
-          const deltaPrice = payload.price - products[productIndex].price
-          products[productIndex] = payload
-
-          if (deltaPrice !== 0) {
-            await cartService.updateProduct(payload.id, deltaPrice)
+    if (_id) {
+      await databaseService.products.updateOne(
+        { _id },
+        {
+          $set: {
+            ...productData
+          },
+          $currentDate: {
+            updated_at: true
           }
         }
-      } else {
-        products.push(new Product(payload))
-      }
-      await writeFileAsync(PRODUCTS_DATA_DIR, products)
-    } catch (error) {
-      console.error('Error saving product:', error)
-    }
+      )
+    } else await databaseService.products.insertOne(new Product({ ...productData }))
   }
 
   async fetchAll() {
-    return (await readFileAsync(PRODUCTS_DATA_DIR)) as ProductType[]
+    const products = await databaseService.products.find({}).toArray()
+    return products
   }
 
   async findById(id: string) {
-    const products: ProductType[] = await readFileAsync(PRODUCTS_DATA_DIR)
-    const foundProduct = products.find((product) => product.id === id)
-    if (!foundProduct) {
-      throw new Error('Product not found')
-    }
-    return foundProduct
+    const product = await databaseService.products.findOne({ _id: new ObjectId(id) })
+    if (!product) throw new Error('Product not found')
+    return product
   }
 
   async deleteById(id: string) {
     try {
-      const products: ProductType[] = await readFileAsync(PRODUCTS_DATA_DIR)
-      const product = products.find((product) => product.id === id)
-      const updatedProducts = products.filter((product) => product.id !== id)
-
-      if (product) {
-        await Promise.all([
-          cartService.deleteProduct(id, product.price),
-          writeFileAsync(PRODUCTS_DATA_DIR, updatedProducts)
-        ])
-      }
+      await databaseService.products.deleteOne({ _id: new ObjectId(id) })
     } catch (error) {
       console.error('Error delete product:', error)
     }

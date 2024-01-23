@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express'
+import { ObjectId } from 'mongodb'
 import { ProductReqParams } from '~/models/requests/Product.requests'
-import { ProductInCart } from '~/models/schemas/Cart.schema'
-import cartService from '~/services/cart.services'
+import User from '~/models/schemas/User.schema'
 import productService from '~/services/products.services'
+import userService from '~/services/users.services'
 
 export const renderIndexViewController = async (req: Request, res: Response, next: NextFunction) => {
   const products = await productService.fetchAll()
@@ -25,18 +26,10 @@ export const renderProductDetailController = async (
 }
 
 export const renderCartViewController = async (req: Request, res: Response, next: NextFunction) => {
-  const cart = await cartService.getCart()
-  const products = await productService.fetchAll()
-  const cartProducts: ProductInCart[] = []
+  const { _id } = req.user as User
+  const products = await userService.getCart((_id as ObjectId).toString())
 
-  products.forEach((product) => {
-    const cartProductData = cart.products.find((prod) => prod.id === product.id)
-    if (cartProductData) {
-      cartProducts.push({ productData: product, quantity: cartProductData.quantity })
-    }
-  })
-
-  res.render('shop/cart', { pageTitle: 'Cart', path: '/cart', products: cartProducts })
+  res.render('shop/cart', { pageTitle: 'Cart', path: '/cart', products })
 }
 
 export const renderCheckoutViewController = async (req: Request, res: Response, next: NextFunction) => {
@@ -46,17 +39,18 @@ export const renderCheckoutViewController = async (req: Request, res: Response, 
 
 export const addToCartController = async (req: Request, res: Response, next: NextFunction) => {
   const { productId } = req.body
+  const { _id } = req.user as User
 
   const product = await productService.findById(productId)
-
-  await cartService.addProduct(productId, product.price)
+  await userService.addToCart((_id as ObjectId).toString(), product)
 
   res.redirect('/cart')
 }
 
-export const deleteCartProductController = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteCartItemsController = async (req: Request, res: Response, next: NextFunction) => {
   const { productId } = req.body
+  const { _id } = req.user as User
   const product = await productService.findById(productId)
-  await cartService.deleteProduct(productId, product.price)
+  await userService.deleteCartItem((_id as ObjectId).toString(), product)
   res.redirect('/cart')
 }

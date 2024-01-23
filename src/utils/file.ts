@@ -1,5 +1,4 @@
 import fs from 'fs'
-import fsPromise from 'fs/promises'
 import { DATA_DIR } from '~/constants/dir'
 
 export const initFolder = () => {
@@ -11,17 +10,4 @@ export const initFolder = () => {
       })
     }
   })
-}
-
-export const readFileAsync = async (filePath: string, errorFallback: any = []) => {
-  try {
-    const data = await fsPromise.readFile(filePath)
-    return JSON.parse(data.toString())
-  } catch (error) {
-    return errorFallback
-  }
-}
-
-export const writeFileAsync = async (filePath: string, data: any) => {
-  await fsPromise.writeFile(filePath, JSON.stringify(data))
 }
