@@ -1,6 +1,8 @@
+import { omit } from 'lodash'
 import databaseService from './database.services'
 import { ObjectId } from 'mongodb'
 import { UserReqBody } from '~/models/requests/User.requests'
+import Order from '~/models/schemas/Order.schema'
 import { ProductType } from '~/models/schemas/Product.schema'
 import User from '~/models/schemas/User.schema'
 
@@ -24,8 +26,8 @@ class UserService {
     const cartProducts = await databaseService.products.find({ _id: { $in: productIds } }).toArray()
 
     const cartItems = cartProducts.map((product) => ({
-      ...product,
-      quantity: user.cart.find((item) => item.productId.equals(product._id))?.quantity
+      ...omit(product, ['created_at', 'updated_at']),
+      quantity: user.cart.find((item) => item.productId.equals(product._id))?.quantity || 0
     }))
 
     return cartItems
@@ -68,6 +70,36 @@ class UserService {
         }
       }
     )
+  }
+
+  async getOrders(userId: ObjectId) {
+    const orders = await databaseService.orders.find({ 'user._id': userId }).toArray()
+    return orders
+  }
+
+  async addOrder(userId: string) {
+    const user = await this.findById(userId)
+    const orderItems = await this.getCart(userId)
+
+    await Promise.all([
+      databaseService.orders.insertOne(
+        new Order({
+          user: {
+            _id: new ObjectId(userId),
+            username: user.username
+          },
+          items: orderItems
+        })
+      ),
+      databaseService.users.updateOne(
+        { _id: new ObjectId(userId) },
+        {
+          $set: {
+            cart: []
+          }
+        }
+      )
+    ])
   }
 }
 

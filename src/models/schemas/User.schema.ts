@@ -1,5 +1,4 @@
 import { ObjectId } from 'mongodb'
-import { ProductType } from './Product.schema'
 
 interface CartItemType {
   productId: ObjectId

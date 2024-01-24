@@ -2,8 +2,10 @@ import { Collection, Db, MongoClient } from 'mongodb'
 import Product from '~/models/schemas/Product.schema'
 import 'dotenv/config'
 import User from '~/models/schemas/User.schema'
+import Order from '~/models/schemas/Order.schema'
 
-const { DB_NAME, DB_USERNAME, DB_PASSWORD, DB_PRODUCTS_COLLECTION, DB_USERS_COLLECTION } = process.env
+const { DB_NAME, DB_USERNAME, DB_PASSWORD, DB_PRODUCTS_COLLECTION, DB_USERS_COLLECTION, DB_ORDERS_COLLECTION } =
+  process.env
 const uri = `mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@bookstore.qzftzpb.mongodb.net/?retryWrites=true&w=majority`
 
 class DatabaseService {
@@ -33,6 +35,10 @@ class DatabaseService {
 
   get users(): Collection<User> {
     return this.db.collection(DB_USERS_COLLECTION as string)
+  }
+
+  get orders(): Collection<Order> {
+    return this.db.collection(DB_ORDERS_COLLECTION as string)
   }
 }
 
