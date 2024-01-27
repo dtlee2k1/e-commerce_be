@@ -34,7 +34,19 @@ class ProductService {
 
   async deleteById(id: string) {
     try {
-      await databaseService.products.deleteOne({ _id: new ObjectId(id) })
+      await Promise.all([
+        databaseService.products.deleteOne({ _id: new ObjectId(id) }),
+        databaseService.users.updateMany(
+          { 'cart.productId': new ObjectId(id) },
+          {
+            $pull: {
+              cart: {
+                productId: new ObjectId(id)
+              }
+            }
+          }
+        )
+      ])
     } catch (error) {
       console.error('Error delete product:', error)
     }
