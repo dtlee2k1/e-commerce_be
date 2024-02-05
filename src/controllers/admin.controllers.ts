@@ -1,12 +1,11 @@
 import { Request, Response, NextFunction } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
-import { ObjectId } from 'mongodb'
 import { ProductReqBody } from '~/models/requests/Product.requests'
-import User from '~/models/schemas/User.schema'
-import productService from '~/services/products.services'
+import Product from '~/models/schemas/Product.schema'
+import { UserType } from '~/models/schemas/User.schema'
 
 export const renderAdminProductsViewController = async (req: Request, res: Response, next: NextFunction) => {
-  const products = await productService.fetchAll()
+  const products = await Product.find({})
   res.render('admin/products', { pageTitle: 'Admin Products', path: '/admin/products', products })
 }
 
@@ -17,7 +16,7 @@ export const renderAddProductViewController = (req: Request, res: Response, next
 export const renderEditProductViewController = async (req: Request, res: Response, next: NextFunction) => {
   const editMode = req.query.edit
   const { productId } = req.params
-  const product = await productService.findById(productId)
+  const product = await Product.findById(productId)
 
   res.render('admin/edit-product', {
     pageTitle: 'Edit Product',
@@ -33,8 +32,10 @@ export const addProductController = async (
   next: NextFunction
 ) => {
   const { title, imageUrl, price, description } = req.body
-  const { _id: userId } = req.user as User
-  await productService.save({ title, imageUrl, price: +price, description, userId: userId as ObjectId })
+  const { _id: userId } = req.user as UserType
+  const product = new Product({ title, imageUrl, price, description, userId })
+  await product.save()
+
   res.redirect('/')
 }
 
@@ -44,22 +45,13 @@ export const editProductController = async (
   next: NextFunction
 ) => {
   const { productId, title, imageUrl, price, description } = req.body
-  const { _id: userId } = req.user as User
-
-  await productService.save({
-    _id: new ObjectId(productId),
-    title,
-    imageUrl,
-    price: +price,
-    description,
-    userId: userId as ObjectId
-  })
+  await Product.findByIdAndUpdate(productId, { title, imageUrl, price, description })
 
   res.redirect('/admin/products')
 }
 
 export const deleteProductController = async (req: Request, res: Response, next: NextFunction) => {
   const { productId } = req.params
-  await productService.deleteById(productId)
+  await Product.deleteOne({ _id: productId })
   res.redirect('/admin/products')
 }

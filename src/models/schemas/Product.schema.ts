@@ -1,7 +1,7 @@
-import { ObjectId } from 'mongodb'
+import { ObjectId, Schema, model, Types } from 'mongoose'
 
 export interface ProductType {
-  _id?: ObjectId
+  _id: ObjectId
   userId: ObjectId
   title: string
   imageUrl: string
@@ -11,26 +11,39 @@ export interface ProductType {
   updated_at?: Date
 }
 
-export default class Product {
-  _id?: ObjectId
-  userId: ObjectId
-  title: string
-  imageUrl: string
-  price: number
-  description: string
-  created_at: Date
-  updated_at: Date
+const productSchema = new Schema<ProductType>(
+  {
+    userId: {
+      type: Types.ObjectId,
+      ref: 'User'
+    },
+    title: {
+      type: String,
+      require: true
+    },
+    imageUrl: {
+      type: String,
+      require: true
+    },
+    price: {
+      type: Number,
+      require: true
+    },
+    description: {
+      type: String,
+      require: true
+    },
+    created_at: {
+      type: Date,
+      default: new Date()
+    },
+    updated_at: {
+      type: Date,
+      default: new Date()
+    }
+  },
+  { versionKey: false }
+)
 
-  constructor({ _id, userId, title, imageUrl, price, description, created_at, updated_at }: ProductType) {
-    const date = new Date()
-
-    this._id = _id || new ObjectId()
-    this.userId = userId
-    this.title = title
-    this.imageUrl = imageUrl
-    this.price = price
-    this.description = description
-    this.created_at = created_at || date
-    this.updated_at = updated_at || date
-  }
-}
+const Product = model('Product', productSchema)
+export default Product

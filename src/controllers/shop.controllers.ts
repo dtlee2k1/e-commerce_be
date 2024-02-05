@@ -1,17 +1,16 @@
 import { Request, Response, NextFunction } from 'express'
-import { ObjectId } from 'mongodb'
 import { ProductReqParams } from '~/models/requests/Product.requests'
-import User from '~/models/schemas/User.schema'
-import productService from '~/services/products.services'
-import userService from '~/services/users.services'
+import Order from '~/models/schemas/Order.schema'
+import Product, { ProductType } from '~/models/schemas/Product.schema'
+import User, { UserType } from '~/models/schemas/User.schema'
 
 export const renderIndexViewController = async (req: Request, res: Response, next: NextFunction) => {
-  const products = await productService.fetchAll()
+  const products = await Product.find({})
   res.render('shop/index', { pageTitle: 'Shop', path: '/', products })
 }
 
 export const renderProductsViewController = async (req: Request, res: Response, next: NextFunction) => {
-  const products = await productService.fetchAll()
+  const products = await Product.find({})
   res.render('shop/product-list', { pageTitle: 'All products', path: '/products', products })
 }
 
@@ -21,50 +20,70 @@ export const renderProductDetailController = async (
   next: NextFunction
 ) => {
   const { productId } = req.params
-  const product = await productService.findById(productId)
+  const product = await Product.findById(productId)
   res.render('shop/product-detail', { pageTitle: 'Product detail', path: '/products', product })
 }
 
 export const renderCartViewController = async (req: Request, res: Response, next: NextFunction) => {
-  const { _id } = req.user as User
-  const products = await userService.getCart((_id as ObjectId).toString())
-
+  const user = await (req.user as UserType).populate('cart.items.productId')
+  const products = user.cart.items
   res.render('shop/cart', { pageTitle: 'Cart', path: '/cart', products })
 }
 
 export const renderOrdersViewController = async (req: Request, res: Response, next: NextFunction) => {
-  const { _id } = req.user as User
-  const orders = await userService.getOrders(_id as ObjectId)
-  res.render('shop/orders', { pageTitle: 'Checkout', path: '/orders', orders })
+  const { _id } = req.user as UserType
+  const orders = await Order.find({ userId: _id })
+
+  res.render('shop/orders', { pageTitle: 'Orders', path: '/orders', orders })
 }
 
 export const renderCheckoutViewController = async (req: Request, res: Response, next: NextFunction) => {
-  const products = await productService.fetchAll()
-  res.render('shop/checkout', { pageTitle: 'Checkout', path: '/checkout', products })
+  // const products = Order.find({})
+  res.render('shop/checkout', { pageTitle: 'Checkout', path: '/checkout', products: [] })
 }
 
 export const addToCartController = async (req: Request, res: Response, next: NextFunction) => {
   const { productId } = req.body
-  const { _id } = req.user as User
+  const { _id } = req.user as UserType
+  const product = await Product.findById(productId)
+  const user = await User.findById(_id)
 
-  const product = await productService.findById(productId)
-  await userService.addToCart((_id as ObjectId).toString(), product)
-
+  if (!user) {
+    throw new Error('User not found')
+  }
+  await user.addToCart(product as ProductType)
   res.redirect('/cart')
 }
 
 export const deleteCartItemsController = async (req: Request, res: Response, next: NextFunction) => {
   const { productId } = req.body
-  const { _id } = req.user as User
-  const product = await productService.findById(productId)
-  await userService.deleteCartItem((_id as ObjectId).toString(), product)
+
+  const { _id: userId } = req.user as UserType
+  const user = await User.findById(userId)
+  if (!user) {
+    throw new Error('User not found')
+  }
+  await user.deleteCartItem(productId)
+
   res.redirect('/cart')
 }
 
 export const addOrderController = async (req: Request, res: Response, next: NextFunction) => {
-  const { _id } = req.user as User
+  const { _id } = req.user as UserType
 
-  await userService.addOrder((_id as ObjectId).toString())
+  const user = await (req.user as UserType).populate('cart.items.productId')
+  if (!user) {
+    throw new Error('User not found')
+  }
+  const order = new Order({
+    userId: _id,
+    products: user.cart.items.map((item) => ({
+      product: { ...item.productId },
+      quantity: item.quantity
+    }))
+  })
 
-  res.redirect('/cart')
+  await Promise.all([order.save(), User.updateOne({ _id }, { 'cart.items': [] })])
+
+  res.redirect('/orders')
 }

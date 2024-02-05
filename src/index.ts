@@ -6,7 +6,8 @@ import { render404ViewController } from './controllers/errors.controllers'
 import { initFolder } from './utils/file'
 import { defaultErrorHandler } from './middlewares/error.middlewares'
 import databaseService from './services/database.services'
-import userService from './services/users.services'
+import User from './models/schemas/User.schema'
+
 const port = 3000
 const app = express()
 
@@ -22,7 +23,7 @@ app.use(express.static(path.resolve('public')))
 
 app.use(async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = await userService.findById('65ae9d5bd99887cb31b15a2e')
+    const user = await User.findById('65b69f26f94b27eda3a08657')
 
     if (user === null) {
       throw new Error('User not found')

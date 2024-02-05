@@ -1,39 +1,40 @@
-import { ObjectId } from 'mongodb'
+import { Model, ObjectId, Schema, Types, model } from 'mongoose'
+import { ProductType } from './Product.schema'
 
 interface OrderItem {
-  _id: ObjectId
+  product: ProductType
   quantity: number
-  userId: ObjectId
-  title: string
-  imageUrl: string
-  price: number
-  description: string
 }
 
-interface User {
+export interface OrderType {
   _id: ObjectId
-  username: string
-}
-
-interface OrderType {
-  _id?: ObjectId
-  user: User
-  items: OrderItem[]
+  userId: ObjectId
+  products: OrderItem[]
   created_at?: Date
 }
 
-export default class Order {
-  _id?: ObjectId
-  user: User
-  items: OrderItem[]
-  created_at: Date
+const orderSchema = new Schema<OrderType>(
+  {
+    userId: { type: Types.ObjectId, ref: 'User', required: true },
+    products: [
+      {
+        product: {
+          type: Object,
+          required: true
+        },
+        quantity: {
+          type: Number,
+          required: true
+        }
+      }
+    ],
+    created_at: {
+      type: Date,
+      default: new Date()
+    }
+  },
+  { versionKey: false }
+)
 
-  constructor({ _id, user, items, created_at }: OrderType) {
-    const date = new Date()
-
-    this._id = _id
-    this.user = user
-    this.items = items
-    this.created_at = created_at || date
-  }
-}
+const Order = model('Order', orderSchema)
+export default Order

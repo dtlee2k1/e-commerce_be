@@ -29,6 +29,6 @@ shopRouter.post('/cart-delete-item', deleteCartItemsController)
 
 shopRouter.post('/create-order', addOrderController)
 
-shopRouter.get('/checkout', renderCheckoutViewController)
+// shopRouter.get('/checkout', renderCheckoutViewController)
 
 export default shopRouter
