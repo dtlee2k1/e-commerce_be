@@ -1,4 +1,4 @@
-import express from 'express'
+import { Router } from 'express'
 import {
   addOrderController,
   addToCartController,
@@ -11,7 +11,7 @@ import {
   renderProductsViewController
 } from '~/controllers/shop.controllers'
 
-const shopRouter = express.Router()
+const shopRouter = Router()
 
 shopRouter.get('/', renderIndexViewController)
 
@@ -29,6 +29,6 @@ shopRouter.post('/cart-delete-item', deleteCartItemsController)
 
 shopRouter.post('/create-order', addOrderController)
 
-// shopRouter.get('/checkout', renderCheckoutViewController)
+shopRouter.get('/checkout', renderCheckoutViewController)
 
 export default shopRouter

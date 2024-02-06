@@ -6,12 +6,17 @@ import User, { UserType } from '~/models/schemas/User.schema'
 
 export const renderIndexViewController = async (req: Request, res: Response, next: NextFunction) => {
   const products = await Product.find({})
-  res.render('shop/index', { pageTitle: 'Shop', path: '/', products })
+  res.render('shop/index', { pageTitle: 'Shop', path: '/', products, isAuthenticated: req.session.isLoggedIn })
 }
 
 export const renderProductsViewController = async (req: Request, res: Response, next: NextFunction) => {
   const products = await Product.find({})
-  res.render('shop/product-list', { pageTitle: 'All products', path: '/products', products })
+  res.render('shop/product-list', {
+    pageTitle: 'All products',
+    path: '/products',
+    products,
+    isAuthenticated: req.session.isLoggedIn
+  })
 }
 
 export const renderProductDetailController = async (
@@ -21,25 +26,35 @@ export const renderProductDetailController = async (
 ) => {
   const { productId } = req.params
   const product = await Product.findById(productId)
-  res.render('shop/product-detail', { pageTitle: 'Product detail', path: '/products', product })
+  res.render('shop/product-detail', {
+    pageTitle: 'Product detail',
+    path: '/products',
+    product,
+    isAuthenticated: req.session.isLoggedIn
+  })
 }
 
 export const renderCartViewController = async (req: Request, res: Response, next: NextFunction) => {
   const user = await (req.user as UserType).populate('cart.items.productId')
   const products = user.cart.items
-  res.render('shop/cart', { pageTitle: 'Cart', path: '/cart', products })
+  res.render('shop/cart', { pageTitle: 'Cart', path: '/cart', products, isAuthenticated: req.session.isLoggedIn })
 }
 
 export const renderOrdersViewController = async (req: Request, res: Response, next: NextFunction) => {
   const { _id } = req.user as UserType
   const orders = await Order.find({ userId: _id })
 
-  res.render('shop/orders', { pageTitle: 'Orders', path: '/orders', orders })
+  res.render('shop/orders', { pageTitle: 'Orders', path: '/orders', orders, isAuthenticated: req.session.isLoggedIn })
 }
 
 export const renderCheckoutViewController = async (req: Request, res: Response, next: NextFunction) => {
   // const products = Order.find({})
-  res.render('shop/checkout', { pageTitle: 'Checkout', path: '/checkout', products: [] })
+  res.render('shop/checkout', {
+    pageTitle: 'Checkout',
+    path: '/checkout',
+    products: [],
+    isAuthenticated: req.session.isLoggedIn
+  })
 }
 
 export const addToCartController = async (req: Request, res: Response, next: NextFunction) => {

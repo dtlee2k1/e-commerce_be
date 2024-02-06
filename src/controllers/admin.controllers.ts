@@ -6,11 +6,21 @@ import { UserType } from '~/models/schemas/User.schema'
 
 export const renderAdminProductsViewController = async (req: Request, res: Response, next: NextFunction) => {
   const products = await Product.find({})
-  res.render('admin/products', { pageTitle: 'Admin Products', path: '/admin/products', products })
+  res.render('admin/products', {
+    pageTitle: 'Admin Products',
+    path: '/admin/products',
+    products,
+    isAuthenticated: req.session.isLoggedIn
+  })
 }
 
 export const renderAddProductViewController = (req: Request, res: Response, next: NextFunction) => {
-  res.render('admin/edit-product', { pageTitle: 'Add Product', path: '/admin/add-product', editing: false })
+  res.render('admin/edit-product', {
+    pageTitle: 'Add Product',
+    path: '/admin/add-product',
+    editing: false,
+    isAuthenticated: req.session.isLoggedIn
+  })
 }
 
 export const renderEditProductViewController = async (req: Request, res: Response, next: NextFunction) => {
@@ -22,7 +32,8 @@ export const renderEditProductViewController = async (req: Request, res: Respons
     pageTitle: 'Edit Product',
     path: '/admin/edit-product',
     editing: JSON.parse(editMode as string),
-    product
+    product,
+    isAuthenticated: req.session.isLoggedIn
   })
 }
 

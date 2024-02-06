@@ -5,3 +5,10 @@ declare module 'express' {
     user?: UserType
   }
 }
+
+declare module 'express-session' {
+  interface SessionData {
+    isLoggedIn?: boolean
+    user?: UserType
+  }
+}

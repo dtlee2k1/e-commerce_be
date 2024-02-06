@@ -1,4 +1,4 @@
-import express from 'express'
+import { Router } from 'express'
 import {
   addProductController,
   deleteProductController,
@@ -8,7 +8,7 @@ import {
   renderEditProductViewController
 } from '~/controllers/admin.controllers'
 
-const adminRouter = express.Router()
+const adminRouter = Router()
 
 // /admin/add-product => GET
 adminRouter.get('/add-product', renderAddProductViewController)
