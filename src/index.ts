@@ -11,9 +11,12 @@ import authRouter from './routes/auth.routes'
 import MongoDBStore from 'connect-mongodb-session'
 import session from 'express-session'
 import User, { UserType } from './models/schemas/User.schema'
+import helmet from 'helmet'
+import flash from 'connect-flash'
 
 const port = 3000
 const app = express()
+app.use(helmet())
 
 const { DB_NAME, DB_USERNAME, DB_PASSWORD } = process.env
 const uri = `mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@bookstore.qzftzpb.mongodb.net/${DB_NAME}?retryWrites=true&w=majority`
@@ -42,12 +45,12 @@ app.set('views', './src/views')
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static(path.resolve('public')))
-
 app.use(
   session({
     secret: process.env.SECRET_KEY as string,
     resave: false,
     saveUninitialized: false,
+    cookie: { httpOnly: true },
     store
   })
 )
@@ -57,15 +60,15 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
     if (!req.session) {
       return next()
     }
-
     const user = await User.findById(req.session.user?._id)
-
     req.user = user as UserType
     next()
   } catch (error) {
     console.log(error)
   }
 })
+
+app.use(flash())
 
 app.use('/admin', adminRouter)
 app.use(shopRouter)

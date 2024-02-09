@@ -11,6 +11,7 @@ export interface UserType extends Document {
   _id?: ObjectId
   username: string
   email: string
+  password: string
   cart: {
     items: CartItemType[]
   }
@@ -32,6 +33,10 @@ const userSchema = new Schema<UserType, UserModel, IUserMethods>(
       require: true
     },
     email: {
+      type: String,
+      require: true
+    },
+    password: {
       type: String,
       require: true
     },
